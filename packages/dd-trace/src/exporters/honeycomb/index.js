@@ -34,7 +34,7 @@ class HoneycombExporter {
 module.exports = HoneycombExporter;
 
 // Singleton https://refactoring.guru/design-patterns/singleton/typescript/example
-export class HoneycombDataDogForwarder {
+ class HoneycombDataDogForwarder {
   static honeycombSdk;
 
   /**
