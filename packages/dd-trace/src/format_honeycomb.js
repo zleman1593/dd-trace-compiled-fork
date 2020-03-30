@@ -27,7 +27,7 @@ const map = {
  * @param span
  * @returns HoneycombDDSpan
  */
-export function formatSpansForHoneycomb(span) {
+function formatSpansForHoneycomb(span) {
   const honeycombSpan = formatSpan(span);
 
   extractError(honeycombSpan, span);
@@ -205,3 +205,5 @@ function serialize(obj) {
     console.error(e);
   }
 }
+
+module.exports = formatSpansForHoneycomb;
