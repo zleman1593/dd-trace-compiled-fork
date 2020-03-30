@@ -33,9 +33,25 @@ class HoneycombExporter {
 
 module.exports = HoneycombExporter;
 
+let _honeycombSdk;
+  /**
+   * Initialize Honeycomb library
+   */
+  function getHoneycombSdk() {
+    if (_honeycombSdk) {
+      return _honeycombSdk;
+    }
+    if (process.env.HONEYCOMB_WRITE_KEY) {
+      _honeycombSdk = new libHoney({
+        writeKey: process.env.HONEYCOMB_WRITE_KEY,
+        // This is WELL Specific atm
+        dataset: `well-${process.env.SERVICE}-${process.env.ENV.toLowerCase()}`,
+      });
+    }
+    return _honeycombSdk;
+  }
 // Singleton https://refactoring.guru/design-patterns/singleton/typescript/example
  class HoneycombDataDogForwarder {
-  static honeycombSdk;
 
   /**
    * Have to call this immediately before span.finish()
@@ -68,22 +84,7 @@ module.exports = HoneycombExporter;
     }
   }
 
-  /**
-   * Initialize Honeycomb library
-   */
-  static getHoneycombSdk() {
-    if (HoneycombDataDogForwarder.honeycombSdk) {
-      return HoneycombDataDogForwarder.honeycombSdk;
-    }
-    if (process.env.HONEYCOMB_WRITE_KEY) {
-      HoneycombDataDogForwarder.honeycombSdk = new libHoney({
-        writeKey: process.env.HONEYCOMB_WRITE_KEY,
-        // This is WELL Specific atm
-        dataset: `well-${process.env.SERVICE}-${process.env.ENV.toLowerCase()}`,
-      });
-    }
-    return HoneycombDataDogForwarder.honeycombSdk;
-  }
+
 
   /**
    * Takes a trace (array of spans) generated from Datadog and sends it to honeycomb with sampling
@@ -100,7 +101,7 @@ module.exports = HoneycombExporter;
     childSpanSampleRate = 1,
     slowTraceLimitMs = 3000,
   }) {
-    const hny = HoneycombDataDogForwarder.getHoneycombSdk();
+    const hny = getHoneycombSdk();
     if (hny == null) {
       return;
     }
