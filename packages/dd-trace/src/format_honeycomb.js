@@ -40,7 +40,6 @@ function formatSpansForHoneycomb(span) {
 
 function formatSpan(span) {
   const spanContext = span.context();
-  const traceContext = spanContext._trace.traceContext;
   // Root span won't have a duration because it isn't finished when this is called.
   const duration_ms =
     spanContext._parentId != null
@@ -155,7 +154,7 @@ function extractAnalytics(trace, span) {
   }
 }
 
-function addTag(meta, metrics, key, value, seen?) {
+function addTag(meta, metrics, key, value, seen) {
   switch (typeof value) {
     case "string":
       meta[key] = value;
