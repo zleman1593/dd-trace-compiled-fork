@@ -1,96 +1,92 @@
-"use strict";
+'use strict'
 
-const Tags = require("opentracing").Tags;
-const analyticsSampler = require("../../dd-trace/src/analytics_sampler");
+const Tags = require('opentracing').Tags
+const analyticsSampler = require('../../dd-trace/src/analytics_sampler')
 
-const OPERATION_NAME = "pg.query";
+const OPERATION_NAME = 'pg.query'
 
-function createWrapQuery(tracer, config) {
-  return function wrapQuery(query) {
-    return function queryWithTrace() {
-      const scope = tracer.scope();
-      const childOf = scope.active();
+function createWrapQuery (tracer, config) {
+  return function wrapQuery (query) {
+    return function queryWithTrace () {
+      const scope = tracer.scope()
+      const childOf = scope.active()
       const span = tracer.startSpan(OPERATION_NAME, {
         childOf,
         tags: {
           [Tags.SPAN_KIND]: Tags.SPAN_KIND_RPC_CLIENT,
-          "service.name": config.service || `${tracer._service}-postgres`,
-          "span.type": "sql",
-          "db.type": "postgres"
+          'service.name': config.service || `${tracer._service}-postgres`,
+          'span.type': 'sql',
+          'db.type': 'postgres'
         }
-      });
+      })
 
-      analyticsSampler.sample(span, config.analytics);
+      analyticsSampler.sample(span, config.analytics)
 
-      const retval = scope.bind(query, span).apply(this, arguments);
-      const queryQueue = this.queryQueue || this._queryQueue;
-      const activeQuery = this.activeQuery || this._activeQuery;
-      const pgQuery = queryQueue[queryQueue.length - 1] || activeQuery;
+      const retval = scope.bind(query, span).apply(this, arguments)
+      const queryQueue = this.queryQueue || this._queryQueue
+      const activeQuery = this.activeQuery || this._activeQuery
+      const pgQuery = queryQueue[queryQueue.length - 1] || activeQuery
 
       if (!pgQuery) {
-        return retval;
+        return retval
       }
 
-      const originalCallback = pgQuery.callback;
-      const statement = pgQuery.text;
-      const queryValues = pgQuery.values;
-      const params = this.connectionParameters;
+      const originalCallback = pgQuery.callback
+      const statement = pgQuery.text
+      const params = this.connectionParameters
 
-      span.setTag("resource.name", statement);
-      if (queryValues != null) {
-        span.setTag("resource.query_values", JSON.stringify(queryValues));
-      }
+      span.setTag('resource.name', statement)
 
       if (params) {
         span.addTags({
-          "db.name": params.database,
-          "db.user": params.user,
-          "out.host": params.host,
-          "out.port": params.port
-        });
+          'db.name': params.database,
+          'db.user': params.user,
+          'out.host': params.host,
+          'out.port': params.port
+        })
       }
 
       pgQuery.callback = scope.bind((err, res) => {
         if (err) {
           span.addTags({
-            "error.type": err.name,
-            "error.msg": err.message,
-            "error.stack": err.stack
-          });
+            'error.type': err.name,
+            'error.msg': err.message,
+            'error.stack': err.stack
+          })
         }
 
-        span.finish();
+        span.finish()
 
         if (originalCallback) {
-          originalCallback(err, res);
+          originalCallback(err, res)
         }
-      }, childOf);
+      }, childOf)
 
-      return retval;
-    };
-  };
+      return retval
+    }
+  }
 }
 
 module.exports = [
   {
-    name: "pg",
-    versions: [">=4"],
-    patch(pg, tracer, config) {
-      this.wrap(pg.Client.prototype, "query", createWrapQuery(tracer, config));
+    name: 'pg',
+    versions: ['>=4'],
+    patch (pg, tracer, config) {
+      this.wrap(pg.Client.prototype, 'query', createWrapQuery(tracer, config))
     },
-    unpatch(pg) {
-      this.unwrap(pg.Client.prototype, "query");
+    unpatch (pg) {
+      this.unwrap(pg.Client.prototype, 'query')
     }
   },
   {
-    name: "pg",
-    versions: [">=4"],
-    file: "lib/native/index.js",
-    patch(Client, tracer, config) {
-      this.wrap(Client.prototype, "query", createWrapQuery(tracer, config));
+    name: 'pg',
+    versions: ['>=4'],
+    file: 'lib/native/index.js',
+    patch (Client, tracer, config) {
+      this.wrap(Client.prototype, 'query', createWrapQuery(tracer, config))
     },
-    unpatch(Client) {
-      this.unwrap(Client.prototype, "query");
+    unpatch (Client) {
+      this.unwrap(Client.prototype, 'query')
     }
   }
-];
+]
