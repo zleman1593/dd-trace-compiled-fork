@@ -73,8 +73,15 @@ export declare interface Tracer extends opentracing.Tracer {
    * If the `orphanable` option is set to false, the function will not be traced
    * unless there is already an active span or `childOf` option.
    */
-  trace<T>(name: string, fn: (span?: Span, fn?: (error?: Error) => any) => T): T;
-  trace<T>(name: string, options: TraceOptions & SpanOptions, fn: (span?: Span, done?: (error?: Error) => string) => T): T;
+  trace<T>(
+    name: string,
+    fn: (span?: Span, fn?: (error?: Error) => any) => T
+  ): T;
+  trace<T>(
+    name: string,
+    options: TraceOptions & SpanOptions,
+    fn: (span?: Span, done?: (error?: Error) => string) => T
+  ): T;
 
   /**
    * Wrap a function to automatically create a span activated on its
@@ -90,9 +97,21 @@ export declare interface Tracer extends opentracing.Tracer {
    * * The function doesn't accept a callback and doesn't return a promise, in
    * which case the span will finish at the end of the function execution.
    */
-  wrap<T = (...args: any[]) => any>(name: string, fn: T, requiresParent?: boolean): T;
-  wrap<T = (...args: any[]) => any>(name: string, options: TraceOptions & SpanOptions, fn: T): T;
-  wrap<T = (...args: any[]) => any>(name: string, options: (...args: any[]) => TraceOptions & SpanOptions, fn: T): T;
+  wrap<T = (...args: any[]) => any>(
+    name: string,
+    fn: T,
+    requiresParent?: boolean
+  ): T;
+  wrap<T = (...args: any[]) => any>(
+    name: string,
+    options: TraceOptions & SpanOptions,
+    fn: T
+  ): T;
+  wrap<T = (...args: any[]) => any>(
+    name: string,
+    options: (...args: any[]) => TraceOptions & SpanOptions,
+    fn: T
+  ): T;
 }
 
 export declare interface TraceOptions extends Analyzable {
@@ -100,18 +119,18 @@ export declare interface TraceOptions extends Analyzable {
    * The resource you are tracing. The resource name must not be longer than
    * 5000 characters.
    */
-  resource?: string,
+  resource?: string;
 
   /**
    * The service you are tracing. The service name must not be longer than
    * 100 characters.
    */
-  service?: string,
+  service?: string;
 
   /**
    * The type of request.
    */
-  type?: string
+  type?: string;
 }
 
 /**
@@ -154,17 +173,17 @@ export declare interface SamplingRule {
   /**
    * Sampling rate for this rule.
    */
-  sampleRate: Number
+  sampleRate: Number;
 
   /**
    * Service on which to apply this rule. The rule will apply to all services if not provided.
    */
-  service?: string | RegExp
+  service?: string | RegExp;
 
   /**
    * Operation name on which to apply this rule. The rule will apply to all operation names if not provided.
    */
-  name?: string | RegExp
+  name?: string | RegExp;
 }
 
 /**
@@ -188,7 +207,7 @@ export declare interface TracerOptions {
    * traces with logs.
    * @default false
    */
-  logInjection?: boolean,
+  logInjection?: boolean;
 
   /**
    * Enable Trace Analytics.
@@ -228,7 +247,7 @@ export declare interface TracerOptions {
      * The port of the Dogstatsd agent that the metrics will submitted to.
      * @default 8125
      */
-    port?: number
+    port?: number;
   };
 
   /**
@@ -252,61 +271,68 @@ export declare interface TracerOptions {
    * Whether to enable runtime metrics.
    * @default false
    */
-  runtimeMetrics?: boolean
+  runtimeMetrics?: boolean;
 
   /**
    * Whether to track the scope of async functions. This is needed for async/await to work with non-native promises (thenables). Only disable this if you are sure only native promises are used with async/await.
    * @default true
    */
-  trackAsyncScope?: boolean
+  trackAsyncScope?: boolean;
 
   /**
    * Experimental features can be enabled all at once by using true or individually using key / value pairs.
    * @default {}
    */
-  experimental?: boolean | {
-    b3?: boolean
+  experimental?:
+    | boolean
+    | {
+        b3?: boolean;
 
-    /**
-     * Whether to add an auto-generated `runtime-id` tag to spans and metrics.
-     * @default false
-     */
-    runtimeId?: boolean
+        /**
+         * Whether to add an auto-generated `runtime-id` tag to spans and metrics.
+         * @default false
+         */
+        runtimeId?: boolean;
 
-    /**
-     * Whether to write traces to log output, rather than send to an agent
-     * @default false
-     */
-    exporter?: 'log' | 'browser' | 'agent'
+        /**
+         * Whether to write traces to log output, rather than send to an agent
+         * @default false
+         */
+        exporter?:
+          | "log"
+          | "browser"
+          | "agent"
+          | "honeycomb"
+          | "datadog&honeycomb";
 
-    /**
-     * List of origins to whitelist for distributed tracing. This is used to determine whether to propagate context from the browser for CORS.
-     * @default []
-     */
-    distributedTracingOriginWhitelist?: (string|RegExp)[]
+        /**
+         * List of origins to whitelist for distributed tracing. This is used to determine whether to propagate context from the browser for CORS.
+         * @default []
+         */
+        distributedTracingOriginWhitelist?: (string | RegExp)[];
 
-    /**
-     * Configuration of the priority sampler. Supports a global config and rules by span name or service name. The first matching rule is applied, and if no rule matches it falls back to the global config or on the rates provided by the agent if there is no global config.
-     */
-    sampler?: {
-      /**
-       * Sample rate to apply globally when no other rule is matched. Omit to fallback on the dynamic rates returned by the agent instead.
-       */
-      sampleRate?: Number,
+        /**
+         * Configuration of the priority sampler. Supports a global config and rules by span name or service name. The first matching rule is applied, and if no rule matches it falls back to the global config or on the rates provided by the agent if there is no global config.
+         */
+        sampler?: {
+          /**
+           * Sample rate to apply globally when no other rule is matched. Omit to fallback on the dynamic rates returned by the agent instead.
+           */
+          sampleRate?: Number;
 
-      /**
-       * Global rate limit that is applied on the global sample rate and all rules.
-       * @default 100
-       */
-      rateLimit?: Number,
+          /**
+           * Global rate limit that is applied on the global sample rate and all rules.
+           * @default 100
+           */
+          rateLimit?: Number;
 
-      /**
-       * Sampling rules to apply to priority sampling.
-       * @default []
-       */
-      rules?: SamplingRule[]
-    }
-  };
+          /**
+           * Sampling rules to apply to priority sampling.
+           * @default []
+           */
+          rules?: SamplingRule[];
+        };
+      };
 
   /**
    * Whether to load all built-in plugins.
@@ -334,30 +360,30 @@ export declare interface TracerOptions {
    * implementation for the runtime. Only change this if you know what you are
    * doing.
    */
-  scope?: 'async_hooks' | 'noop'
+  scope?: "async_hooks" | "noop";
 
   /**
    * Whether to report the hostname of the service host. This is used when the agent is deployed on a different host and cannot determine the hostname automatically.
    * @default false
    */
-  reportHostname?: boolean
+  reportHostname?: boolean;
 
   /**
    * Client token for browser tracing. Can be generated in the UI at `Integrations -> APIs`.
    */
-  clientToken?: string
+  clientToken?: string;
 
   /**
    * A string representing the minimum tracer log level to use when debug logging is enabled
    * @default 'debug'
    */
-  logLevel?: 'error' | 'debug'
+  logLevel?: "error" | "debug";
 
   /**
    * If false, require a parent in order to trace.
    * @default true
    */
-  orphanable?: boolean
+  orphanable?: boolean;
 }
 
 /** @hidden */
@@ -365,8 +391,14 @@ interface EventEmitter {
   emit(eventName: string | symbol, ...args: any[]): any;
   on?(eventName: string | symbol, listener: (...args: any[]) => any): any;
   off?(eventName: string | symbol, listener: (...args: any[]) => any): any;
-  addListener?(eventName: string | symbol, listener: (...args: any[]) => any): any;
-  removeListener?(eventName: string | symbol, listener: (...args: any[]) => any): any;
+  addListener?(
+    eventName: string | symbol,
+    listener: (...args: any[]) => any
+  ): any;
+  removeListener?(
+    eventName: string | symbol,
+    listener: (...args: any[]) => any
+  ): any;
 }
 
 /** @hidden */
@@ -401,7 +433,7 @@ export declare interface Scope {
    * @param {Function} fn Function that will have the span activated on its scope.
    * @returns The return value of the provided function.
    */
-  activate<T>(span: Span, fn: ((...args: any[]) => T)): T;
+  activate<T>(span: Span, fn: (...args: any[]) => T): T;
 
   /**
    * Binds a target to the provided span, or the active span if omitted.
@@ -418,48 +450,48 @@ export declare interface Scope {
 
 /** @hidden */
 interface Plugins {
-  "amqp10": plugins.amqp10;
-  "amqplib": plugins.amqplib;
+  amqp10: plugins.amqp10;
+  amqplib: plugins.amqplib;
   "aws-sdk": plugins.aws_sdk;
-  "bluebird": plugins.bluebird;
-  "bunyan": plugins.bunyan;
+  bluebird: plugins.bluebird;
+  bunyan: plugins.bunyan;
   "cassandra-driver": plugins.cassandra_driver;
-  "connect": plugins.connect;
-  "couchbase": plugins.couchbase;
-  "dns": plugins.dns;
-  "elasticsearch": plugins.elasticsearch;
-  "express": plugins.express;
-  "fastify": plugins.fastify;
-  "fs": plugins.fs;
+  connect: plugins.connect;
+  couchbase: plugins.couchbase;
+  dns: plugins.dns;
+  elasticsearch: plugins.elasticsearch;
+  express: plugins.express;
+  fastify: plugins.fastify;
+  fs: plugins.fs;
   "generic-pool": plugins.generic_pool;
   "google-cloud-pubsub": plugins.google_cloud_pubsub;
-  "graphql": plugins.graphql;
-  "grpc": plugins.grpc;
-  "hapi": plugins.hapi;
-  "http": plugins.http;
-  "http2": plugins.http2;
-  "ioredis": plugins.ioredis;
-  "knex": plugins.knex;
-  "koa": plugins.koa;
+  graphql: plugins.graphql;
+  grpc: plugins.grpc;
+  hapi: plugins.hapi;
+  http: plugins.http;
+  http2: plugins.http2;
+  ioredis: plugins.ioredis;
+  knex: plugins.knex;
+  koa: plugins.koa;
   "limitd-client": plugins.limitd_client;
-  "memcached": plugins.memcached;
+  memcached: plugins.memcached;
   "mongodb-core": plugins.mongodb_core;
-  "mysql": plugins.mysql;
-  "mysql2": plugins.mysql2;
-  "net": plugins.net;
-  "paperplane": plugins.paperplane;
-  "pg": plugins.pg;
-  "pino": plugins.pino;
+  mysql: plugins.mysql;
+  mysql2: plugins.mysql2;
+  net: plugins.net;
+  paperplane: plugins.paperplane;
+  pg: plugins.pg;
+  pino: plugins.pino;
   "promise-js": plugins.promise_js;
-  "promise": plugins.promise;
-  "q": plugins.q;
-  "redis": plugins.redis;
-  "restify": plugins.restify;
-  "rhea": plugins.rhea;
-  "router": plugins.router;
-  "tedious": plugins.tedious;
-  "when": plugins.when;
-  "winston": plugins.winston;
+  promise: plugins.promise;
+  q: plugins.q;
+  redis: plugins.redis;
+  restify: plugins.restify;
+  rhea: plugins.rhea;
+  router: plugins.router;
+  tedious: plugins.tedious;
+  when: plugins.when;
+  winston: plugins.winston;
 }
 
 /** @hidden */
@@ -496,7 +528,11 @@ declare namespace plugins {
      *
      * @default /^.*$/
      */
-    whitelist?: string | RegExp | ((url: string) => boolean) | (string | RegExp | ((url: string) => boolean))[];
+    whitelist?:
+      | string
+      | RegExp
+      | ((url: string) => boolean)
+      | (string | RegExp | ((url: string) => boolean))[];
 
     /**
      * List of URLs that should not be instrumented. Takes precedence over
@@ -504,7 +540,11 @@ declare namespace plugins {
      *
      * @default []
      */
-    blacklist?: string | RegExp | ((url: string) => boolean) | (string | RegExp | ((url: string) => boolean))[];
+    blacklist?:
+      | string
+      | RegExp
+      | ((url: string) => boolean)
+      | (string | RegExp | ((url: string) => boolean))[];
 
     /**
      * An array of headers to include in the span metadata.
@@ -541,7 +581,11 @@ declare namespace plugins {
       /**
        * Hook to execute just before the request span finishes.
        */
-      request?: (span?: opentracing.Span, req?: IncomingMessage, res?: ServerResponse) => any;
+      request?: (
+        span?: opentracing.Span,
+        req?: IncomingMessage,
+        res?: ServerResponse
+      ) => any;
     };
 
     /**
@@ -577,7 +621,11 @@ declare namespace plugins {
       /**
        * Hook to execute just before the request span finishes.
        */
-      request?: (span?: opentracing.Span, req?: ClientRequest, res?: IncomingMessage) => any;
+      request?: (
+        span?: opentracing.Span,
+        req?: ClientRequest,
+        res?: IncomingMessage
+      ) => any;
     };
   }
 
@@ -619,7 +667,9 @@ declare namespace plugins {
      * the key/value pairs to record. For example, using
      * `variables => variables` would record all variables.
      */
-    metadata?: string[] | ((variables: { [key: string]: any }) => { [key: string]: any });
+    metadata?:
+      | string[]
+      | ((variables: { [key: string]: any }) => { [key: string]: any });
   }
 
   /**
@@ -772,7 +822,9 @@ declare namespace plugins {
      * the key/value pairs to record. For example, using
      * `variables => variables` would record all variables.
      */
-    variables?: string[] | ((variables: { [key: string]: any }) => { [key: string]: any });
+    variables?:
+      | string[]
+      | ((variables: { [key: string]: any }) => { [key: string]: any });
 
     /**
      * Whether to collapse list items into a single element. (i.e. single
@@ -799,12 +851,12 @@ declare namespace plugins {
     /**
      * Configuration for gRPC clients.
      */
-    client?: Grpc,
+    client?: Grpc;
 
     /**
      * Configuration for gRPC servers.
      */
-    server?: Grpc
+    server?: Grpc;
   }
 
   /**
@@ -825,12 +877,12 @@ declare namespace plugins {
     /**
      * Configuration for HTTP clients.
      */
-    client?: HttpClient,
+    client?: HttpClient;
 
     /**
      * Configuration for HTTP servers.
      */
-    server?: HttpServer
+    server?: HttpServer;
 
     /**
      * Hooks to run before spans are finished.
@@ -859,12 +911,12 @@ declare namespace plugins {
     /**
      * Configuration for HTTP clients.
      */
-    client?: Http2Client,
+    client?: Http2Client;
 
     /**
      * Configuration for HTTP servers.
      */
-    server?: Http2Server
+    server?: Http2Server;
   }
 
   /**
