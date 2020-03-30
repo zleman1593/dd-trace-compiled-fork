@@ -4,7 +4,7 @@
 // const Writer = require("./writer");
 // const Scheduler = require("./scheduler");
 const libHoney = require("libhoney");
-const  createHash  require('crypto').createHash;
+const  createHash  = require('crypto').createHash;
 
 class HoneycombExporter {
   constructor({ url, hostname, port, flushInterval }, prioritySampler) {
